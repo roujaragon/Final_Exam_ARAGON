@@ -1,0 +1,47 @@
+#This is the playbook for installing the prerequisites
+
+---
+
+- hosts: all
+  become: true
+  pre_tasks:
+
+  - name: Install dnf and epel-release (CentOS)
+    yum:
+      name:
+        - dnf
+        - epel-release
+      state: latest
+    when: ansible_distribution == "CentOS"
+
+  - name: Installing Updates (Ubuntu)
+    apt:
+      update_cache: yes
+      upgrade: dist
+    when: ansible_distribution == "Ubuntu"
+
+  - name: Installing Updates (CentOS)
+    dnf:
+      update_cache: yes
+      name: "*"
+      state: latest
+    when: ansible_distribution == "CentOS"
+
+  - name: dpkg Configuration (Ubuntu)
+    shell: |
+      dpkg --configure -a
+    when: ansible_distribution == "Ubuntu"
+
+  - name: MOTD Banner
+    debug:
+      msg: "Ansible Managed by Aragon"
+
+- hosts: ubuntu
+  become: true
+  roles:
+  - role: ubuntu
+
+- hosts: centos
+  become: true
+  roles:
+  - role: centos
